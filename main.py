@@ -29,6 +29,7 @@ class Query:
         self.columns = []
         self.table = ""
         self.conditions = []
+        self.values = []
         self.add_condition = "AND"
         self.type = ""
         self.direction = ""
@@ -37,6 +38,11 @@ class Query:
             "start": self._select_start,
             "target": self._select_target,
             "payload": self._select_payload
+        }
+        self.builds['INSERT'] = {
+            "start": self._insert_start,
+            "target": self._insert_target,
+            "payload": self._insert_payload
         }
 
     def select_(self, *columns):
@@ -61,6 +67,9 @@ class Query:
         self.direction = "INTO"
         return self
 
+    def values_(self, *values):
+        self.values.append(values)
+        return self
 
     def where_ (self, **conditions):
         self.conditions.append({
@@ -96,6 +105,22 @@ class Query:
             
         return f"WHERE {string}"
 
+    def _insert_start(self):
+        return f"INSERT ({keys_only(self.columns)})"
+
+    def _insert_target(self):
+        return f"INTO {self.table}"
+
+    def _insert_payload(self):
+        string = f"VALUES ({keys_only(self.values[0])}),"
+
+        for inputs in self.values[1:]:
+            string += f"({keys_only(inputs)}),"
+
+        return string[:-1:]
+    
+
 q = Query()
 
 print(q.select_().from_('Users').where_(id="1", name="moh").or_().where_(id="2").build_())
+print(q.insert_("id, name").into_("Houses").values_("1", "Red Villa").values_("2", "Big Flat").values_("3", "cottage in the woods").build_())
