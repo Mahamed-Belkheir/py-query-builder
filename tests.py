@@ -1,6 +1,6 @@
 
 import unittest
-from pyquery.helpers import keys_and_values, keys_with_values
+from pyquery.helpers import keys_and_values, keys_with_values, keys_only
 
 class helperTest(unittest.TestCase):
     
@@ -19,6 +19,12 @@ class helperTest(unittest.TestCase):
         self.assertTupleEqual(
             keys_with_values_tuple,
             ("user, country, level", "adam, libya, low")
+        )
+
+    def test_keys_only(self):
+        self.assertEqual(
+            keys_only(("user", "country", "level")),
+            "user, country, level"
         )
 
 unittest.main()
